@@ -2,16 +2,11 @@ import numpy, csv
 
 BOARD_SIZE = 9
 BOX_SIZE = 3
+BLANKS_AS_ZEROES = True
 
 def create_board(path):
-    array = numpy.zeros((9,9), 'i')
-    #Open csv and construct grid to match csv
-    with open(path, 'r') as csv_file:
-        reader = csv.reader(csv_file, delimiter= ',')
-        rowindex = 0
-        for row in reader:
-            array[rowindex] = row
-            rowindex += 1
+    # array = numpy.zeros((9,9), 'i')
+    array = numpy.genfromtxt(path, delimiter=',', dtype='int')
     return array
 
 def no_duplicates(unsorted_list):
@@ -56,6 +51,24 @@ def get_unsolved(board):
                 unsolved.append([r,c])
     return unsolved
 
+def print_board(board):
+    string = ""
+    for j in range(BOARD_SIZE):
+        if j > 0 and j % BOX_SIZE == 0:
+            for i in range(BOARD_SIZE + ((BOARD_SIZE // BOX_SIZE) - 1) - 1):
+                string += "--"
+            string += "-\n"
+        for i in range(BOARD_SIZE):
+            if i > 0 and i % BOX_SIZE == 0:
+                string += "|{}".format(" ")
+            val = board[i][j]
+            if val == 0 and BLANKS_AS_ZEROES:
+                val = " "
+            string += "{}{}".format(val, " ")
+        if j < (BOARD_SIZE - 1):
+            string += '\n'
+    print(string)
+
 def recursive_solve(board, unsolved):
     if len(unsolved) == 0:
         return True
@@ -70,9 +83,16 @@ def recursive_solve(board, unsolved):
     unsolved.append(coordinate)
     return False
 
-board = create_board('csv/hard.csv')
-print(board)
-unsolved = get_unsolved(board)
-print(recursive_solve(board, unsolved))
-print(board)
+def main():
+    board = create_board('csv/hard.csv')
+    print_board(board)
+    # unsolved = get_unsolved(board)
+    # print(recursive_solve(board, unsolved))
+    # print(board)
+
+if __name__ == '__main__':
+    main()
+
+
+
 
