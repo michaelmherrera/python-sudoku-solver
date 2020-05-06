@@ -32,7 +32,7 @@ Corresponds to the following board (blanks are represented by zeroes):
 ```
 
 ### Performance enhancements
-This sudoku solver uses recursive backtracking. 
+This sudoku solver uses recursive backtracking.
 * It starts in the upper right box. 
 * For each unsolved box, it first checks if 1 is a valid number for the location. 
     * If it is, the algorithm proceeds to the next box. If not, it iterates to 2, etc.
