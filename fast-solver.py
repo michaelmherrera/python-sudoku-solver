@@ -3,7 +3,7 @@ import time
 
 BOARD_SIZE = 9
 BOX_SIZE = 3
-BLANKS_AS_ZEROES = True
+BLANKS_AS_ZEROES = False
 
 def create_board(path):
     board = np.zeros((BOARD_SIZE * 2, BOARD_SIZE * 2), 'i')
@@ -29,6 +29,7 @@ def print_board(board):
         if r < (BOARD_SIZE - 1):
             string += '\n'
     print(string)
+    return string
 
 def get_quadrant_indices(row, column, n):
     """
@@ -112,7 +113,7 @@ def initialize(load_path):
 def solve(board):
     unsolved = get_unsolved(board)
     populate_sorted_quadrants(board)
-    recursive_solve(board, unsolved)
+    return recursive_solve(board, unsolved)
 
 def print_stats(initial_time, pre_recurse_time):
     finished_time = time.time()
@@ -123,12 +124,15 @@ def print_stats(initial_time, pre_recurse_time):
 def main():
     # load_path = input('Enter a path for the board you would like to load: ')
     load_path = 'csv/hard.csv'
-    
     initial_time = time.time()
     board = initialize(load_path)
     pre_recurse_time = time.time()
-    solve(board)
-    print('\nSolved board:')
+    solved = solve(board)
+    if not solved:
+        print('\nInvalid board. Board not solvable. Check board.')
+        print('Attempted solution:')
+    else:
+        print('\nSolved board:')
     print_board(board)
     print_stats(initial_time, pre_recurse_time)
     # load_path = input('Enter a path to save the solved board: ')
