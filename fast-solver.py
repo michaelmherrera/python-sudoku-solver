@@ -3,7 +3,7 @@ import time
 
 BOARD_SIZE = 9
 BOX_SIZE = 3
-BLANKS_AS_ZEROES = False
+BLANKS = '*'
 
 def create_board(path):
     board = np.zeros((BOARD_SIZE * 2, BOARD_SIZE * 2), 'i')
@@ -23,8 +23,8 @@ def print_board(board):
             if c > 0 and c % BOX_SIZE == 0:
                 string += '|{}'.format(' ')
             val = board[r][c]
-            if val == 0 and not BLANKS_AS_ZEROES:
-                val = ' '
+            if val == 0:
+                val = BLANK
             string += '{}{}'.format(val, ' ')
         if r < (BOARD_SIZE - 1):
             string += '\n'
