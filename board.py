@@ -3,15 +3,15 @@ import numpy as np
 
 
 class Board:
-    def __init__(self, path, board_size=9, blank=' '):
+    def __init__(self, path, size=9, blank=' '):
         """
         Generate a board from a csv.
 
         Parameters
         ----------
-        path: the path to the csv file. Must have the same dimensions as board_size. Must be comprised of integers
+        path: the path to the csv file. Must have the same dimensions as size. Must be comprised of integers
 
-        board_size: dimension of the board. For example, board_size = 9 leads to a 9x9 board -- the typical size.
+        size: dimension of the board. For example, size = 9 leads to a 9x9 board -- the typical size.
             Must be a square number.
 
         blank: how blanks are rendered when the board is printed. 
@@ -20,24 +20,22 @@ class Board:
         -------
         A Board instance
         """
-        self.board_size = board_size
+        self.size = size
         self.blank = blank
-        self.subgrid_size = int(math.sqrt(board_size))
+        self.subgrid_size = int(math.sqrt(size))
         self.sudoku_board = np.genfromtxt(path, delimiter=',', dtype='int')
         self.unsolved = self.get_unsolved()
 
-        self.row_indicators = np.zeros((self.board_size, self.board_size))
-        self.column_indicators = np.zeros((self.board_size, self.board_size))
-        self.subgrid_indicators = np.zeros((self.board_size, self.board_size))
+        self.row_indicators = np.zeros((self.size, self.size))
+        self.column_indicators = np.zeros((self.size, self.size))
+        self.subgrid_indicators = np.zeros((self.size, self.size))
         self.populate_indicator_arrays()
-        print(self.row_indicators)
-        print(self.column_indicators)
-        print(self.subgrid_indicators)
+        self.indicators = None
 
         # For the purposes of legacy code as I fully implement the class
         # TODO: Remove after implementation
-        self.og_array = np.zeros((board_size * 2, board_size * 2), 'i')
-        self.og_array[0:board_size, 0:board_size] = np.genfromtxt(
+        self.og_array = np.zeros((size * 2, size * 2), 'i')
+        self.og_array[0:size, 0:size] = np.genfromtxt(
             path, delimiter=',', dtype='int')
 
     def __str__(self):
@@ -58,21 +56,21 @@ class Board:
 
         """
         string = ''
-        for r in range(self.board_size):
+        for r in range(self.size):
             # Create horizontal dividers
             if r > 0 and r % self.subgrid_size == 0:
-                for c in range(self.board_size + ((self.board_size // self.subgrid_size) - 1) - 1):
+                for c in range(self.size + ((self.size // self.subgrid_size) - 1) - 1):
                     string += '--'
                 string += '-\n'
             # Create vertical dividers and place values
-            for c in range(self.board_size):
+            for c in range(self.size):
                 if c > 0 and c % self.subgrid_size == 0:
                     string += '|{}'.format(' ')
                 val = self.sudoku_board[r][c]
                 if val == 0:
                     val = self.blank
                 string += '{}{}'.format(val, ' ')
-            if r < (self.board_size - 1):
+            if r < (self.size - 1):
                 string += '\n'
         return string
 
@@ -81,8 +79,8 @@ class Board:
 
 
         """
-        for r in range(self.board_size):
-            for c in range(self.board_size):
+        for r in range(self.size):
+            for c in range(self.size):
                 n = self.sudoku_board[r, c]
                 if n != 0:
                     self.__setitem__((r, c), n)
@@ -104,29 +102,51 @@ class Board:
         row, column = row_colum
         return self.sudoku_board[row, column]
 
-    def __setitem__(self, row_column, val):
-        """ Place val in the specified row and column on the sudoku board and update corresponding indicators.
+    def __setitem__(self, row_column, new_val):
+        """ Place new_val in the specified row and column on the sudoku board and update corresponding indicators.
+
+        If new_val = 0, sets the indicators corresponding to the current val at location (row, column) to False.
 
         Parameters
         ----------
         row_column:
             A tuple where row_column = (row, column) and (row, column) is the coordinates
             of the location being updated.
-        val:
+        new_val:
             The new value to be placed.
 
         """
-        assert 1 <= val and val <= self.board_size, \
+        assert 0 <= new_val and new_val <= self.size, \
             "Value {0} is out of bounds for a sudoku board of size {2}. Please select a value between {1} and {2}".format(
-                val, 1, self.board_size)
+                new_val, 0, self.size)
 
         row, column = row_column
-        self.sudoku_board[row, column] = val
-        self.row_indicators[row, val - 1] = True
-        self.column_indicators[val - 1, column] = True
+        self.update_indicators(row, column, new_val)
+        self.sudoku_board[row, column] = new_val
+
+    def update_indicators(self, row, column, new_val):
+        if new_val == 0:  # If zeroing out a location, update corresponding indicators to False
+            curr_val = self.sudoku_board[row, column]
+            self.row_indicators[row, curr_val - 1] = False
+            self.column_indicators[curr_val - 1, column] = False
+            subgrid_row = (row//self.subgrid_size) * \
+                self.subgrid_size + (column//self.subgrid_size)
+            self.subgrid_indicators[subgrid_row, curr_val - 1] = False
+        else:
+            self.row_indicators[row, new_val - 1] = True
+            self.column_indicators[new_val - 1, column] = True
+            subgrid_row = (row//self.subgrid_size) * \
+                self.subgrid_size + (column//self.subgrid_size)
+            self.subgrid_indicators[subgrid_row, new_val - 1] = True
+
+
+    def is_valid_assignment(self, row, column, val):
         subgrid_row = (row//self.subgrid_size) * \
             self.subgrid_size + (column//self.subgrid_size)
-        self.subgrid_indicators[subgrid_row, val - 1] = True
+        valid_row = not self.row_indicators[row, val-1]
+        valid_col = not self.column_indicators[val-1, column]
+        valid_subgrid = not self.subgrid_indicators[subgrid_row, val - 1]
+        return valid_row and valid_col and valid_subgrid
 
     def get_unsolved(self):
         """Get a list of the unsolved locations on the board.
@@ -137,16 +157,9 @@ class Board:
 
         """
         unsolved = []
-        for r in range(self.board_size):
-            for c in range(self.board_size):
+        for r in range(self.size):
+            for c in range(self.size):
                 if self.sudoku_board[r, c] == 0:
                     unsolved.append((r, c))
         unsolved.reverse()
         return unsolved
-
-    # another string method, but for printing entire board
-        # use decorators somehow?
-
-    # variables to store current location
-
-    # unsolved pop
