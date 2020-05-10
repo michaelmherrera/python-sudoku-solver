@@ -1,9 +1,8 @@
 import numpy as np
 import time
-
 BOARD_SIZE = 9
 BOX_SIZE = 3
-BLANKS = '*'
+BLANK = '*'
 
 def create_board(path):
     board = np.zeros((BOARD_SIZE * 2, BOARD_SIZE * 2), 'i')
