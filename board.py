@@ -3,9 +3,17 @@ import numpy as np
 
 
 class Board:
+    """ A sudoku board with utilities to
+    * Get and set values of the board
+    * Keep track of what locations of the board are unsolved
+    * Provide a string representation of itself
+    * Rapidly check if the assignment of a value to a location is valid
+
+    """
+
+
     def __init__(self, path, size=9, blank=' '):
-        """
-        Generate a board from a csv.
+        """Generate a board from a csv.
 
         Parameters
         ----------
@@ -105,8 +113,6 @@ class Board:
     def __setitem__(self, row_column, new_val):
         """ Place new_val in the specified row and column on the sudoku board and update corresponding indicators.
 
-        If new_val = 0, sets the indicators corresponding to the current val at location (row, column) to False.
-
         Parameters
         ----------
         row_column:
@@ -125,6 +131,18 @@ class Board:
         self.sudoku_board[row, column] = new_val
 
     def update_indicators(self, row, column, new_val):
+        """ Update the row, column and subgrid indicators to reflect the changed value
+
+        Parameters
+        ----------
+        row:
+            The row or the location to be updated
+        column:
+            The column of the location to be update
+        new_val:
+            The new value to be placed at the location
+
+        """
         if new_val == 0:  # If zeroing out a location, update corresponding indicators to False
             curr_val = self.sudoku_board[row, column]
             self.row_indicators[row, curr_val - 1] = False
@@ -139,8 +157,19 @@ class Board:
                 self.subgrid_size + (column//self.subgrid_size)
             self.subgrid_indicators[subgrid_row, new_val - 1] = True
 
-
     def is_valid_assignment(self, row, column, val):
+        """ Checks if assigning val to (row, column) is valid
+
+        Parameters
+        ----------
+        row:
+            The row of the location being checked
+        column:
+            The column of the location being check
+        val:
+            The value being checked
+
+        """
         subgrid_row = (row//self.subgrid_size) * \
             self.subgrid_size + (column//self.subgrid_size)
         valid_row = not self.row_indicators[row, val-1]

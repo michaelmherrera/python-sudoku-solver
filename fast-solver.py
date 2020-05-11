@@ -2,6 +2,7 @@ import numpy as np
 import time
 from board import Board
 
+
 def recursive_solve(board):
     if len(board.unsolved) == 0:
         return True
@@ -17,6 +18,7 @@ def recursive_solve(board):
                 board[r, c] = 0
     board.unsolved.append(coordinate)
     return False
+
 
 def main():
     # load_path = input('Enter a path for the board you would like to load: ')
@@ -35,9 +37,7 @@ def main():
     # load_path = input('Enter a path to save the solved board: ')
     # board.savetxt(load_path, a, delimiter=',')
 
+
 if __name__ == '__main__':
     main()
-
-
-
 
