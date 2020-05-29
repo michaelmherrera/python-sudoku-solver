@@ -12,15 +12,12 @@ class Board:
     """
 
 
-    def __init__(self, path, size=9, blank=' '):
+    def __init__(self, path, blank=' '):
         """Generate a board from a csv.
 
         Parameters
         ----------
         path: the path to the csv file. Must have the same dimensions as size. Must be comprised of integers
-
-        size: dimension of the board. For example, size = 9 leads to a 9x9 board -- the typical size.
-            Must be a square number.
 
         blank: how blanks are rendered when the board is printed. 
 
@@ -28,23 +25,24 @@ class Board:
         -------
         A Board instance
         """
-        self.size = size
         self.blank = blank
-        self.subgrid_size = int(math.sqrt(size))
+        
         self.sudoku_board = np.genfromtxt(path, delimiter=',', dtype='int')
+        shape = self.sudoku_board.shape
+        if len(shape) == 2 and shape[0] == shape[1] and math.sqrt(shape[0])%1 == 0:
+            self.size = shape[0]
+            self.subgrid_size = int(math.sqrt(self.size))
+        else:
+            raise Exception('Board must be 2-dimensional, square and the dimensions of the board must be square numbers.')
         self.unsolved = self.get_unsolved()
-
         self.row_indicators = np.zeros((self.size, self.size))
         self.column_indicators = np.zeros((self.size, self.size))
         self.subgrid_indicators = np.zeros((self.size, self.size))
         self.populate_indicator_arrays()
         self.indicators = None
 
-        # For the purposes of legacy code as I fully implement the class
-        # TODO: Remove after implementation
-        self.og_array = np.zeros((size * 2, size * 2), 'i')
-        self.og_array[0:size, 0:size] = np.genfromtxt(
-            path, delimiter=',', dtype='int')
+    def savetxt(self, fname, delimiter=','):
+        np.savetxt(fname, self.sudoku_board, fmt='%i', delimiter=delimiter)
 
     def __str__(self):
         """Return the sudoku board as a string, with boxes deliniated.
@@ -80,6 +78,7 @@ class Board:
                 string += '{}{}'.format(val, ' ')
             if r < (self.size - 1):
                 string += '\n'
+        string += '\n'
         return string
 
     def populate_indicator_arrays(self):
