@@ -3,37 +3,36 @@ import numpy as np
 
 
 class Board:
-    """ A sudoku board with utilities to
-    * Get and set values of the board
-    * Keep track of what locations of the board are unsolved
-    * Provide a string representation of itself
-    * Rapidly check if the assignment of a value to a location is valid
+    """ A sudoku board that can track what locations are unsolved, what moves are valid, and produce a string representation of itself
 
     """
-
 
     def __init__(self, path, blank=' '):
         """Generate a board from a csv.
 
         Parameters
         ----------
-        path: the path to the csv file. Must have the same dimensions as size. Must be comprised of integers
+        path: 
+            the path to the csv file. Must have the same dimensions as size. Must be comprised of integers
 
-        blank: how blanks are rendered when the board is printed. 
+        blank: str, optional
+            how blanks are rendered when the board is printed. 
 
         Returns
         -------
         A Board instance
         """
+
         self.blank = blank
-        
+
         self.sudoku_board = np.genfromtxt(path, delimiter=',', dtype='int')
         shape = self.sudoku_board.shape
-        if len(shape) == 2 and shape[0] == shape[1] and math.sqrt(shape[0])%1 == 0:
+        if len(shape) == 2 and shape[0] == shape[1] and math.sqrt(shape[0]) % 1 == 0:
             self.size = shape[0]
             self.subgrid_size = int(math.sqrt(self.size))
         else:
-            raise Exception('Board must be 2-dimensional, square and the dimensions of the board must be square numbers.')
+            raise Exception(
+                'Board must be 2-dimensional, square and the dimensions of the board must be square numbers.')
         self.unsolved = self.get_unsolved()
         self.row_indicators = np.zeros((self.size, self.size))
         self.column_indicators = np.zeros((self.size, self.size))
@@ -42,6 +41,16 @@ class Board:
         self.indicators = None
 
     def savetxt(self, fname, delimiter=','):
+        """Save the sudoku board to the file fname (by default, in the format of a csv)
+
+        Parameters
+        ----------
+        fname: 
+            The name of the file in which to save the board
+        delimeter: str
+            The delimeter for each value in the board. Be default, a comma
+        """
+
         np.savetxt(fname, self.sudoku_board, fmt='%i', delimiter=delimiter)
 
     def __str__(self):
@@ -59,8 +68,8 @@ class Board:
         2 6 3 | 8 9 1 | 7 4 5
         5 9 4 | 7 3 6 | 8 1 2
         7 1 8 | 2 5 4 | 9 6 3
-
         """
+
         string = ''
         for r in range(self.size):
             # Create horizontal dividers
@@ -97,15 +106,15 @@ class Board:
 
         Parameters
         ----------
-        row_column:
+        row_column: tup
             A tuple where row_column = (row, column) and (row, column) is the coordinates
             of the location being updated.
 
         Returns
         -------
         The value at (row, column)
-
         """
+
         row, column = row_colum
         return self.sudoku_board[row, column]
 
@@ -121,6 +130,7 @@ class Board:
             The new value to be placed.
 
         """
+
         assert 0 <= new_val and new_val <= self.size, \
             "Value {0} is out of bounds for a sudoku board of size {2}. Please select a value between {1} and {2}".format(
                 new_val, 0, self.size)
@@ -134,14 +144,14 @@ class Board:
 
         Parameters
         ----------
-        row:
+        row: int
             The row or the location to be updated
-        column:
+        column: int
             The column of the location to be update
-        new_val:
+        new_val: int
             The new value to be placed at the location
-
         """
+
         if new_val == 0:  # If zeroing out a location, update corresponding indicators to False
             curr_val = self.sudoku_board[row, column]
             self.row_indicators[row, curr_val - 1] = False
@@ -161,14 +171,14 @@ class Board:
 
         Parameters
         ----------
-        row:
+        row: int
             The row of the location being checked
-        column:
+        column: int
             The column of the location being check
-        val:
+        val: int
             The value being checked
-
         """
+
         subgrid_row = (row//self.subgrid_size) * \
             self.subgrid_size + (column//self.subgrid_size)
         valid_row = not self.row_indicators[row, val-1]
@@ -182,8 +192,8 @@ class Board:
         Returns:
             A list of tuples where each tuple is the zero-indexed (row, column)
             coordinates of an unsolved location.
-
         """
+
         unsolved = []
         for r in range(self.size):
             for c in range(self.size):
