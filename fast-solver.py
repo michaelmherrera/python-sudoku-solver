@@ -8,12 +8,6 @@ dimension n x n such that n is a square number.
 
 While recursive suduko solvers are common, this one leverages multiple
 numpy arrays storing sorted boards to signficantly improve speed.
-Normally, for a solving algorithm to check if placing some value m in a
-given box (i,j) is valid, it would have to iterate through all of row i,
-column j, and the subgrid that contains (i,j). In this implementation,
-one numpy array stores the spatial representation of the board -- what
-the user sees when the board is printed -- one array stores the board
-with columns sorted, one with rows sorted, and one with subgrids sorted.
 This means checking valid values is not O(n), as it would be typically,
 but is rather O(1). See the README for more explanation on how this arrays
 are implemented.
@@ -99,7 +93,7 @@ def get_args():
     
     description = 'A sudoku solver that takes a csv file representing a sudoku \
         board as input and leverages recursive backtracking to find a solution.'
-    parser = argparse.ArgumentParser(description=description, epilog=__doc__)
+    parser = argparse.ArgumentParser(description=description)
     parser.add_argument(
         '--board', help='load the sudoku board from BOARD, a csv file')
     parser.add_argument(
