@@ -1,6 +1,0 @@
-.gitignore
-venv
-.vscode
-__pycache__
-wsl_env
-solution.csv
