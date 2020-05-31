@@ -140,16 +140,68 @@ Board successfully saved to solution.csv
 ```
 
 
-### Implementation details
-This sudoku solver uses recursive backtracking.
-* It starts in the upper right box. 
-* For each unsolved box, it first checks if 1 is a valid number for the location. 
-    * If it is, the algorithm proceeds to the next box. If not, it iterates to 2, etc.
-    * If it exhausts all options without a valid solution, it backtracks to the previous box.
+## Efficiency optimizations
 
-Normally, to check whether a value is valid for a certain box, a sudoku solving algorithm would have to check the entries of every other box along the same column, row and 3x3 subgrid. However, this can be solved with the following optimization.
-* Create an 18x18 numpy array
-    * TODO: Write explanation XD
-* Thus, when checking if some value n at location (x,y) is valid for a given box, it checks if 
+Normally, to check whether a value is valid for a certain box, a sudoku
+solving algorithm would have to check the entries of every other box
+along the same column, row and subgrid, meaning checking if a move is
+valid is O(n) where n is the dimension of the board. However, this implementation
+reduces it to O(1). The Board class leverages 4 2-d numpy matrices:
+
+  1. A spatially-arranged matrix (the sudoku board that the user sees)
+  2. A matrix where each row contains the values of the original row, but arranged in ascending order
+  3. A matrix where each column contains the values of the original column, but arranged in ascending order
+  4. A matrix where each row contains the values of the original subgrid, but arranged in ascending order
+
+Take the following 4x4 sudoku board for example:
+
+```
+  4 |     
+3   |
+---------
+2   |   3
+4   |   1
+```
+
+Matrix 1 (original) would be arranged as:
+```
+  4 |     
+3   |
+---------
+2   |   3
+4   |   1
+```
+
+Matrix 2 (rows) would be arranged as:
+
+```
+    |   4 
+    | 3
+---------
+ 2  | 3 
+1   |   4
+```
+
+Matrix 3 (columns) would be arranged as:
+
+
+```
+    |   1 
+2   |
+---------
+3   |   3
+4 4 |    
+```
+
+
+Matrix 4 (subgrids) would be arranged as (The upper-left subgrid corresponds to row 0, the upper-right to row 1, the lower-left to row 2 and the lower right to row 3):
+```
+    | 3  4  
+    |
+---------
+  2 |   4
+1   | 3  
+```
  
+I am always looking to improve my technical communication so I encourage any feedback on what could be improved about this explanation.
 
